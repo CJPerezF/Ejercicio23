@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Ejercicio23.view.PaginaInicio"
+             Title="Grabar Audio">
+    <VerticalStackLayout>
+        <Frame>
+            <Image x:Name="img" Source="music.png"/>
+        </Frame>
+        <Button Text="Grabar Audio" Clicked="Start" x:Name="btnStart"/>
+        <Button Text="Detener grabacion" Clicked="Stop" IsEnabled="False" x:Name="btnStop"/>
+
+        <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand" Spacing="10">
+            <Button Text="Guardar audio" Clicked="Guardar" x:Name="btnGuardar" HorizontalOptions="FillAndExpand" IsEnabled="False"/>
+            <Button Text="Lista de audios" Clicked="Lista" x:Name="btnLista" HorizontalOptions="FillAndExpand"/>
+        </StackLayout>
+    </VerticalStackLayout>
+</ContentPage>
