@@ -1,6 +1,8 @@
 using Ejercicio23.Models;
 using Plugin.Maui.Audio;
 using System.Diagnostics;
+using Ejercicio23.Request;
+using Ejercicio23.Services;
 using static Microsoft.Maui.ApplicationModel.Permissions;
 
 namespace Ejercicio23.view
@@ -15,9 +17,12 @@ namespace Ejercicio23.view
         readonly Stopwatch recordingStopwatch = new Stopwatch();
         bool isPlaying;
 
+
+        private RecordedAudioHttpService _service;
         public PaginaInicio()
         {
             InitializeComponent();
+            _service = new RecordedAudioHttpService();
         }
 
         public double RecordingTime
@@ -37,7 +42,7 @@ namespace Ejercicio23.view
             {
                 if (audioManager == null)
                 {
-                    audioManager = Plugin.Maui.Audio.AudioManager.Current;
+                    audioManager = AudioManager.Current;
                 }
 
                 audioRecorder = audioManager.CreateRecorder();
@@ -50,44 +55,51 @@ namespace Ejercicio23.view
             btnStop.IsEnabled = true;
             btnStart.IsEnabled = false;
         }
-
+        
         private async void Guardar(object sender, EventArgs e)
         {
-            if (audioSource != null)
+            if (audioSource is null)
             {
-                Stream stream = ((FileAudioSource)audioSource).GetAudioStream();
-                byte[] audioBytes;
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    await stream.CopyToAsync(ms);
-                    audioBytes = ms.ToArray();
-                }
+                return;
+            }
+            
+            Stream stream = ((FileAudioSource)audioSource).GetAudioStream();
+            byte[] audioBytes;
+            using (MemoryStream ms = new MemoryStream())
+            {
+                await stream.CopyToAsync(ms);
+                audioBytes = ms.ToArray();
+            }
 
-                var audio = new Audios
+            var audio = new Audios
+            {
+                fecha = ""+DateTime.Now.ToLocalTime(),
+                audio = audioBytes
+            };
+                    
+            string appDataPath = FileSystem.Current.AppDataDirectory;
+            string filename = $"{DateTime.Now:yyyyMMddHHmmss}.wav";
+            string filePath = Path.Combine(appDataPath, filename);
+            await File.WriteAllBytesAsync(filePath, audioBytes);
+            string base64 = Convert.ToBase64String(audioBytes);
+               
+            bool isCorrectOperation = await App.Instance.AddAudio(audio) > 0;
+            if (isCorrectOperation)
+            {
+                audioBytes = new byte[0];
+                audioSource = null;
+                btnGuardar.IsEnabled = false;
+           
+                var mysqlRecord = new AudioRecordedReq()
                 {
-                    fecha = ""+DateTime.Now.ToLocalTime().ToString(),
-                    audio = audioBytes
+                    Description = txtDescription.Text,
+                    AudioRecorded = base64,
+                    AudioPath = filePath
                 };
+                await _service.AddRecordingAsync(mysqlRecord);
 
-                try
-                {
-                    if (await App.Instancia.AddAudio(audio) > 0)
-                    {
-                        audioBytes = new byte[0];
-                        audioSource = null;
-                        btnGuardar.IsEnabled = false;
-
-                        await DisplayAlert("Aviso", "Audio guardado correctamente", "Ok");
-                    }
-                    else
-                    {
-                        await DisplayAlert("Aviso", "Ocurrió un error", "Ok");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Manejar excepciones
-                }
+                await DisplayAlert("Aviso", "Audio guardado correctamente", "Ok");
+                txtDescription.Text = "";
             }
         }
 
@@ -100,7 +112,8 @@ namespace Ejercicio23.view
         {
             if (audioSource != null)
             {
-                audioPlayer = this.audioManager.CreateAsyncPlayer(((FileAudioSource)audioSource).GetAudioStream());
+                Stream d = ((FileAudioSource)audioSource).GetAudioStream();
+                audioPlayer = this.audioManager.CreateAsyncPlayer(d);
 
                 isPlaying = true;
                 await audioPlayer.PlayAsync(CancellationToken.None);

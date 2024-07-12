@@ -3,13 +3,13 @@
     x:Class="Ejercicio23.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:Ejercicio23"
+    xmlns:view="clr-namespace:Ejercicio23.view"
     Shell.FlyoutBehavior="Disabled"
     Title="Ejercicio23">
 
     <ShellContent
         Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
+        ContentTemplate="{DataTemplate view:PaginaInicio}"
         Route="MainPage" />
 
 </Shell>

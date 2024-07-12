@@ -2,31 +2,33 @@
 {
     public partial class App : Application
     {
-        private static Controllers.DBProc dbProc;
+        private static Controllers.DBProc _instance;
 
-        public static Controllers.DBProc Instancia
+        public static Controllers.DBProc Instance
         {
             get
             {
-                if (dbProc == null)
+                if (_instance is null)
                 {
-                    string dbname = "AudiosDB.db3";
-                    string dbpath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                    string dbfull = Path.Combine(dbpath, dbname);
-                    dbProc = new Controllers.DBProc(dbfull);
+                    InitializeDBProc();
                 }
 
-                return dbProc;
+                return _instance;
             }
+        }
+
+        private static void InitializeDBProc()
+        {
+            string dbName = "AudiosDB.db3";
+            string dbPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            string dbFullPath = Path.Combine(dbPath, dbName);
+            _instance = new Controllers.DBProc(dbFullPath);
         }
 
         public App()
         {
             InitializeComponent();
-
-            //MainPage = new PaginaInicio();
-
-            MainPage = new NavigationPage(new view.PaginaInicio());
+            MainPage = new AppShell();
         }
     }
 }

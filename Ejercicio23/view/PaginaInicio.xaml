@@ -10,6 +10,7 @@
         <Button Text="Grabar Audio" Clicked="Start" x:Name="btnStart"/>
         <Button Text="Detener grabacion" Clicked="Stop" IsEnabled="False" x:Name="btnStop"/>
 
+        <Entry x:Name="txtDescription" Placeholder="Description" HorizontalOptions="FillAndExpand" />  
         <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand" Spacing="10">
             <Button Text="Guardar audio" Clicked="Guardar" x:Name="btnGuardar" HorizontalOptions="FillAndExpand" IsEnabled="False"/>
             <Button Text="Lista de audios" Clicked="Lista" x:Name="btnLista" HorizontalOptions="FillAndExpand"/>
